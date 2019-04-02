@@ -221,8 +221,25 @@ interface(void *cube_ref)
 	      /* Start the game */
 
 	      /* Fill in */
+		sem_init(&cube->go, 0, 1);
+		
+  		int num = cube->teamA_size + cube->teamB_size;
+		printf("\nMain:: num = %d\n\n", num);
+  		pthread_t wizardThreadsA[cube->teamA_size];
+		pthread_t wizardThreadsB[cube->teamB_size];
+		
+		sem_wait(&cube->go);
+  		for(i = 0; i < cube->teamA_size; ++i){
+			pthread_create(&wizardThreadsA[i], NULL, wizard_func, cube->teamA_wizards[i]);
+			printf("wizardThreadsA[%d] has been created\n", i);
+  		}
 
+		for(i = 0; i < cube->teamB_size; ++i){
+			pthread_create(&wizardThreadsB[i], NULL, wizard_func, cube->teamB_wizards[i]);
+			printf("wizardThreadsB[%d] has been created\n", i);
+		}
 
+		sem_post(&cube->go);
 
 	    }
 	}
@@ -336,6 +353,7 @@ main(int argc, char** argv)
       i++;
     }
 
+	printf("Main:: finished initializing\n");
   /* Sets the random seed */
   srand(seed);
 
@@ -376,23 +394,27 @@ main(int argc, char** argv)
 	  room_col[j] = room;
 
 	  /* Fill in */
-
+	  sem_init(&room->door, 0, 1); 
 	}
       
       cube->rooms[i] = room_col;
     }
 
+	printf("Main:: cube is initialized\n");
+
   /* Creates the wizards and positions them in the cube */
   cube->teamA_size = teamA_size;
-  cube->teamA_wizards = (struct wizard **)malloc(sizeof(struct wizard *) * 
-						 teamA_size);
+  cube->teamA_wizards = (struct wizard **)malloc(sizeof(struct wizard *) * teamA_size);
   assert(cube->teamA_wizards);
 
+	printf("Main:: team A set for initialization\n");
+
   cube->teamB_size = teamB_size;
-  cube->teamB_wizards = (struct wizard **)malloc(sizeof(struct wizard *) * 
-						 teamB_size);
+  cube->teamB_wizards = (struct wizard **)malloc(sizeof(struct wizard *) * teamB_size);
 
   assert(cube->teamB_wizards);
+
+	printf("Main:: team B set for initialization\n");
 
   /* Team A */
   for (i = 0; i < teamA_size; i++)
@@ -403,7 +425,10 @@ main(int argc, char** argv)
 	  exit(1);
 	}
       cube->teamA_wizards[i] = wizard_descr;
+	printf("Main:: teamA_wizard[%d] initialized\n", i);
     }
+
+	printf("Main:: teamA is intialized\n");
 
   /* Team B */
 
@@ -415,11 +440,12 @@ main(int argc, char** argv)
 	  exit(1);
 	}
       cube->teamB_wizards[i] = wizard_descr;
+	printf("Main:: teamB_wizard[%d] initialized\n", i);
     }
 
-  /* Fill in */
-  
+	printf("Main:: team B is initalized\n");
 
+  /* Fill in */
   /* Goes in the interface loop */
   res = interface(cube);
 
@@ -464,9 +490,15 @@ try_room(struct wizard *w, struct room *oldroom, struct room* newroom)
 {
 
   /* Fill in */
-
-  return 1;
-  
+  sem_wait( &newroom->door);
+  if(newroom->wizCount == 2){
+  	sem_post(&newroom->door);
+  	return 1;
+  }
+  else{
+	sem_post(&newroom->door);
+	return 0;
+  }
 }
 
 struct wizard *
@@ -510,7 +542,10 @@ switch_rooms(struct wizard *w, struct room *oldroom, struct room* newroom)
     }
 
   /* Fill in */
+  oldroom->wizCount -= 1;
+  sem_post(&oldroom->door);
 
+  sem_wait(&newroom->door);
   /* Updates room wizards and determines opponent */
   if (newroom->wizards[0] == NULL)
     {
@@ -533,12 +568,15 @@ switch_rooms(struct wizard *w, struct room *oldroom, struct room* newroom)
   /* Sets self's location to current room */
   w->x = newroom->x;
   w->y = newroom->y;
+  newroom->wizCount += 1;
 }
 
 int 
 fight_wizard(struct wizard *self, struct wizard *other, struct room *room)
 {
   int res;
+  sem_t mutex;
+  sem_init(&mutex, 0, 1);
 
   /* Computes the result of the fight */
   res = rand() % 2;
@@ -551,7 +589,9 @@ fight_wizard(struct wizard *self, struct wizard *other, struct room *room)
 	     other->team, other->id);
 
       /* Fill in */
-
+      sem_wait(&mutex);
+	self->status = 1;
+	sem_post(&mutex);
 
     }
 
@@ -564,7 +604,9 @@ fight_wizard(struct wizard *self, struct wizard *other, struct room *room)
 	     other->team, other->id);
 
       /* Fill in */
-
+	sem_wait(&mutex);
+	other->status= 1;
+	sem_post(&mutex);
       return 1;
     }
   return 0;

@@ -1,3 +1,5 @@
+#include <semaphore.h>
+
 #ifndef _CUBE_H
 #define _CUBE_H
 
@@ -22,6 +24,8 @@ struct room {
   struct wizard *wizards[2];
 
   /* Fill in as required */
+  sem_t door;
+  int wizCount;
 };
 
 struct cube {
@@ -36,6 +40,7 @@ struct cube {
   struct room ***rooms;
 
   /* Fill in as required */
+	sem_t go;
 };
 
 extern void print_wizard(struct wizard *);
