@@ -16,6 +16,7 @@ struct wizard {
   struct cube *cube; 
 
   /* Fill in as required */
+	sem_t frozen;
 };
   
 struct room {
