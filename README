@@ -1,0 +1,7 @@
+type 'make' into your terminal
+
+This will result in the file being ready to run.
+
+To run it enter
+./cube –size # –seed # –teamA # –teamB #
+Where # is the number you want each field to be ran with.
