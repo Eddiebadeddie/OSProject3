@@ -1,9 +1,8 @@
-#include <semaphore.h>
-
 #ifndef _CUBE_H
 #define _CUBE_H
 
 #define SOLUTION
+#include <semaphore.h>
 
 struct cube;
 
@@ -16,7 +15,7 @@ struct wizard {
   struct cube *cube; 
 
   /* Fill in as required */
-	sem_t frozen;
+  sem_t frozen;
 };
   
 struct room {
@@ -41,11 +40,14 @@ struct cube {
   struct room ***rooms;
 
   /* Fill in as required */
-	sem_t go;
+  pthread_t *teamAThreads;
+  pthread_t *teamBThreads;
+  sem_t go;
+  sem_t wiz;
 };
 
 extern void print_wizard(struct wizard *);
-extern void kill_wizards(struct wizard *);
+extern void kill_wizards(pthread_t *wizard);
 extern void print_cube(struct cube *);
 extern int check_winner(struct cube *);
 

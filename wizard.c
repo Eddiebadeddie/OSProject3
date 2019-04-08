@@ -29,34 +29,31 @@ wizard_func(void *wizard_descr)
   newroom = choose_room(self);
 
   /* Infinite loop */
-  while (1)
-    {
-      
+  while (1){
+       
       /* Loops until he's able to get a hold on both the old and new rooms */
-      while (1)
-	{
-		sem_wait(&cube->go);
+      while (1){
+	  sem_wait(&cube->wiz);
 	  printf("Wizard %c%d in room (%d,%d) wants to go to room (%d,%d)\n",
 		 self->team, self->id, oldroom->x, oldroom->y, newroom->x, newroom->y);
 	  
 
-	  if (try_room(self, oldroom, newroom))
-	    {
-	      /* Waits a random amount of time */
-	      dostuff();
+	  if(try_room(self, oldroom, newroom)){
+	     /* Waits a random amount of time */
+	     dostuff();
 	      
-	      /* Chooses the new room */
-	      newroom = choose_room(self);
+	     /* Chooses the new room */
+	     newroom = choose_room(self);
 	      
-	      /* Goes back to the initial state and try again */
-		sem_post(&cube->go);
-	      continue;
-	    }
-	  else
-	    {
-	      break;
-	    }
-	}
+	     /* Goes back to the initial state and try again */
+	     continue;
+
+	  }  else  {
+	     
+             break;
+	  
+	  }
+      }
       
       printf("Wizard %c%d in room (%d,%d) moves to room (%d,%d)\n",
 	     self->team, self->id, 
@@ -64,51 +61,43 @@ wizard_func(void *wizard_descr)
 
       /* Fill in */
       
-      /* Self is active and has control over both rooms */
-	sem_wait(&oldroom->door);
+      
       switch_rooms(self, oldroom, newroom);
-	sem_post(&newroom->door);
 
       other = find_opponent(self, newroom);
 
       /* If there is not another wizard does nothing */
-      if (other == NULL)
-	{
+      if (other == NULL){
 	  
-	  printf("Wizard %c%d in room (%d,%d) finds nobody around \n",
-		 self->team, self->id, newroom->x, newroom->y);
+         printf("Wizard %c%d in room (%d,%d) finds nobody around \n",
+                self->team, self->id, newroom->x, newroom->y);
 	  /* Fill in */
-		sem_post(&cube->go);
-	}
-      else
-	{
+	  sem_post(&cube->go);
+
+	} else {
+	  
 	  /* Other is from opposite team */
-	  if (other->team != self->team)
-	    {
+	  if (other->team != self->team){
+	     
+	     /* Checks if the opponent is active */
+	     if (other->status == 0){
+		  
+	        printf("Wizard %c%d in room (%d,%d) finds active enemy\n",
+		       self->team, self->id, newroom->x, newroom->y);
 
-
-	      /* Checks if the opponent is active */
-	      if (other->status == 0)
-		{
-		  printf("Wizard %c%d in room (%d,%d) finds active enemy\n",
-			 self->team, self->id, newroom->x, newroom->y);
-
-		  fight_wizard(self, other, newroom);
-		}
-	      else
-		{
-		  printf("Wizard %c%d in room (%d,%d) finds enemy already frozen\n",
-			 self->team, self->id, newroom->x, newroom->y);
-
-
+		fight_wizard(self, other, newroom);
+		
+	     } else {
+	    
+	        printf("Wizard %c%d in room (%d,%d) finds enemy already frozen\n",
+		       self->team, self->id, newroom->x, newroom->y);
 		}
 	    }
 	  /* Other is from same team */
-	  else
-	    {
+	  else {
+	      
 	      /* Checks if the friend is frozen */
-	      if (other->status == 1)
-		{
+	      if (other->status == 1){
 		  free_wizard(self, other, newroom);
 		}
 	    }
@@ -122,8 +111,10 @@ wizard_func(void *wizard_descr)
 
       oldroom = newroom;
       newroom = choose_room(self);
-	sem_post(&cube->go);
+      sem_post(&cube->go);
     }
+
+
   
   return NULL;
 }
