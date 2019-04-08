@@ -232,7 +232,7 @@ interface(void *cube_ref)
               pthread_cancel(cube->teamAThreads[i]);
 
 	   for(i = 0; i < cube->teamB_size; ++i)          	   
-                    pthread_cancel(cube->teamBThreads[i]);
+              pthread_cancel(cube->teamBThreads[i]);
 	
 	} else if(winner == 2 && cube->game_status == 0){
            
@@ -245,14 +245,14 @@ interface(void *cube_ref)
               pthread_cancel(cube->teamAThreads[i]);
 
            for(i = 0; i < cube->teamB_size; ++i) 
-                    pthread_cancel(cube->teamBThreads[i]);
+              pthread_cancel(cube->teamBThreads[i]);
 
 	} else if(continuous && cube->game_status == 0){
 	   
 	   sem_post(&cube->wiz);
            continue;
 	
-	} else {	    
+	}	    
       
            line = readline("cube> ");
            if (line == NULL) continue;
@@ -310,7 +310,6 @@ interface(void *cube_ref)
 
       sem_post(&cube->go);
       free(line);
-    }
 }
 
   return 0;

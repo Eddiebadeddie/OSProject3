@@ -34,7 +34,6 @@ wizard_func(void *wizard_descr)
        
       /* Loops until he's able to get a hold on both the old and new rooms */
       while (1){
-				while(self->frozen);
 	  sem_wait(&cube->wiz);
 	  printf("Wizard %c%d in room (%d,%d) wants to go to room (%d,%d)\n",
 		 self->team, self->id, oldroom->x, oldroom->y, newroom->x, newroom->y);
@@ -48,6 +47,7 @@ wizard_func(void *wizard_descr)
 	     newroom = choose_room(self);
 	      
 	     /* Goes back to the initial state and try again */
+	     sem_post(&cube->go);
 	     continue;
 
 	  }  else  {
@@ -74,7 +74,7 @@ wizard_func(void *wizard_descr)
          printf("Wizard %c%d in room (%d,%d) finds nobody around \n",
                 self->team, self->id, newroom->x, newroom->y);
 	  /* Fill in */
-	  sem_post(&cube->go);
+	  //sem_post(&cube->go);
 
 	} else {
 	  
