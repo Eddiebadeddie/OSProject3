@@ -228,9 +228,12 @@ interface(void *cube_ref)
 	   //Changing game status to show game is over
 	   cube->game_status = 1;
 	   
-	   break;
-	   	   
-        
+	   for(i = 0; i < cube->teamA_size; ++i)
+              pthread_cancel(cube->teamAThreads[i]);
+
+	   for(i = 0; i < cube->teamB_size; ++i)          	   
+                    pthread_cancel(cube->teamBThreads[i]);
+	
 	} else if(winner == 2 && cube->game_status == 0){
            
 	   printf("Team A won the game!\n");   
@@ -238,7 +241,11 @@ interface(void *cube_ref)
 	   //Changing game status to show game is over
 	   cube->game_status = 1;
 	   
-	   break;
+	   for(i = 0; i < cube->teamA_size; ++i)
+              pthread_cancel(cube->teamAThreads[i]);
+
+           for(i = 0; i < cube->teamB_size; ++i) 
+                    pthread_cancel(cube->teamBThreads[i]);
 
 	} else if(continuous && cube->game_status == 0){
 	   
